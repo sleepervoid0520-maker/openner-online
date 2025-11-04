@@ -1,8 +1,31 @@
 const { Pool } = require('pg');
 
+// Debug: Mostrar todas las variables de entorno de Railway relacionadas con Postgres
+console.log('🔍 Variables PostgreSQL disponibles:');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Configurada ✅' : 'NO configurada ❌');
+console.log('DATABASE_PRIVATE_URL:', process.env.DATABASE_PRIVATE_URL ? 'Configurada ✅' : 'NO configurada ❌');
+console.log('DATABASE_PUBLIC_URL:', process.env.DATABASE_PUBLIC_URL ? 'Configurada ✅' : 'NO configurada ❌');
+console.log('PGHOST:', process.env.PGHOST ? 'Configurada ✅' : 'NO configurada ❌');
+console.log('PGDATABASE:', process.env.PGDATABASE ? 'Configurada ✅' : 'NO configurada ❌');
+
+// Intentar usar DATABASE_URL, luego DATABASE_PRIVATE_URL, luego construir desde PGHOST
+const databaseUrl = process.env.DATABASE_URL || 
+                    process.env.DATABASE_PRIVATE_URL || 
+                    (process.env.PGHOST ? 
+                      `postgresql://${process.env.PGUSER || 'postgres'}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT || 5432}/${process.env.PGDATABASE || 'railway'}` 
+                      : null);
+
+if (!databaseUrl) {
+  console.error('❌ No se encontró ninguna configuración de base de datos PostgreSQL');
+  console.error('Por favor, configura DATABASE_URL en las variables de entorno de Railway');
+  process.exit(1);
+}
+
+console.log('✅ Usando conexión:', databaseUrl.replace(/:[^:@]+@/, ':****@')); // Ocultar password en logs
+
 // Configuración de conexión a PostgreSQL
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: databaseUrl,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 

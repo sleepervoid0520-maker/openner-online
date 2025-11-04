@@ -1,5 +1,5 @@
 const express = require('express');
-const { db } = require('../database/database');
+const { query } = require('../database/database-postgres');
 const { authenticateToken } = require('../middleware/auth');
 
 // Debug: Verificar si el sistema de armas se importa correctamente
@@ -46,17 +46,13 @@ function calculateExpForNextLevel(level) {
 }
 
 // Obtener todas las cajas disponibles (ruta principal)
-router.get('/', authenticateToken, (req, res) => {
-  const userId = req.user.id;
+router.get('/', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-  // Consultar estadísticas pasivas del usuario
-  db.get('SELECT menor_costo_cajas_percent FROM users WHERE id = ?', [userId], (err, userStats) => {
-    if (err) {
-      console.error('Error obteniendo stats de usuario:', err);
-      return res.status(500).json({ error: 'Error interno del servidor' });
-    }
-
-    const discountPercent = userStats?.menor_costo_cajas_percent || 0;
+    // Consultar estadísticas pasivas del usuario
+    const result = await query('SELECT menor_costo_cajas_percent FROM users WHERE id = $1', [userId]);
+    const discountPercent = result.rows[0]?.menor_costo_cajas_percent || 0;
 
     // Obtener armas disponibles para todas las cajas
     const boxWeapons1 = getWeaponsForBox(1);
@@ -126,7 +122,10 @@ router.get('/', authenticateToken, (req, res) => {
       success: true,
       boxes: boxes
     });
-  });
+  } catch (error) {
+    console.error('Error obteniendo cajas:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 // Obtener todas las cajas disponibles (ruta alternativa)
@@ -178,25 +177,27 @@ router.get('/:id', (req, res) => {
 });
 
 // Ruta para abrir una caja (generar loot)
-router.post('/open/:id', authenticateToken, (req, res) => {
-  const boxId = parseInt(req.params.id);
-  
-  if (boxId === 1 || boxId === 2 || boxId === 3 || boxId === 4) {
-    // Verificar que la función existe
-    if (typeof generateRandomLoot !== 'function') {
-      console.error('❌ generateRandomLoot no es una función');
-      return res.status(500).json({
-        success: false,
-        error: "Error interno: función de loot no disponible"
-      });
-    }
-    // Obtener las estadísticas pasivas del usuario
-    db.get('SELECT suerte, mayor_probabilidad_grado, mayor_exp_caja_percent FROM users WHERE id = ?', [req.user.userId], (uErr, uRow) => {
-      if (uErr) {
-        console.error('Error obteniendo stats del usuario:', uErr);
-        return res.status(500).json({ success: false, error: 'Error interno al obtener datos del usuario' });
+router.post('/open/:id', authenticateToken, async (req, res) => {
+  try {
+    const boxId = parseInt(req.params.id);
+    
+    if (boxId === 1 || boxId === 2 || boxId === 3 || boxId === 4) {
+      // Verificar que la función existe
+      if (typeof generateRandomLoot !== 'function') {
+        console.error('❌ generateRandomLoot no es una función');
+        return res.status(500).json({
+          success: false,
+          error: "Error interno: función de loot no disponible"
+        });
+      }
+      // Obtener las estadísticas pasivas del usuario
+      const result = await query('SELECT suerte, mayor_probabilidad_grado, mayor_exp_caja_percent FROM users WHERE id = $1', [req.user.userId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
       }
 
+      const uRow = result.rows[0];
       const userLuck = (uRow && uRow.suerte) ? parseInt(uRow.suerte, 10) : 0;
       const gradeBonus = (uRow && uRow.mayor_probabilidad_grado) ? parseInt(uRow.mayor_probabilidad_grado) : 0;
       const expBonus = (uRow && uRow.mayor_exp_caja_percent) ? parseFloat(uRow.mayor_exp_caja_percent) : 0;
@@ -221,51 +222,52 @@ router.post('/open/:id', authenticateToken, (req, res) => {
         const expGained = Math.round(baseExp * (1 + expBonus / 100));
         
         // Añadir experiencia y calcular niveles
-        db.get('SELECT * FROM users WHERE id = ?', [req.user.userId], (err, user) => {
-          if (err || !user) {
-            console.error('Error obteniendo usuario para exp:', err);
-            // Continuar sin actualizar experiencia
-            const rouletteItems = generateRouletteItems(boxId, 50);
-            return res.json({
-              success: true,
-              wonItem: wonItem,
-              rouletteItems: rouletteItems,
-              boxId: boxId,
-              experienceGained: expGained,
-              message: `¡Has ganado: ${wonItem.name}!`
-            });
-          }
-          
-          let newExp = user.experience + expGained;
-          let newLevel = user.level;
-          let leveledUp = false;
-          
-          // Calcular si sube de nivel (la exp se resetea al subir)
-          while (newExp >= calculateExpForNextLevel(newLevel)) {
-            newExp -= calculateExpForNextLevel(newLevel); // Restar la exp usada
-            newLevel++;
-            leveledUp = true;
-          }
-          
-          // Actualizar nivel y experiencia
-          db.run('UPDATE users SET level = ?, experience = ? WHERE id = ?', [newLevel, newExp, req.user.userId], (expErr) => {
-            if (expErr) {
-              console.error('Error actualizando nivel/experiencia:', expErr);
-            }
-            
-            // Generar items para la ruleta
-            const rouletteItems = generateRouletteItems(boxId, 50);
-            res.json({
-              success: true,
-              wonItem: wonItem,
-              rouletteItems: rouletteItems,
-              boxId: boxId,
-              experienceGained: expGained,
-              leveledUp: leveledUp,
-              newLevel: newLevel,
-              message: `¡Has ganado: ${wonItem.name}!${leveledUp ? ' ¡SUBISTE DE NIVEL!' : ''}`
-            });
+        const userResult = await query('SELECT * FROM users WHERE id = $1', [req.user.userId]);
+        
+        if (userResult.rows.length === 0) {
+          console.error('Error obteniendo usuario para exp');
+          // Continuar sin actualizar experiencia
+          const rouletteItems = generateRouletteItems(boxId, 50);
+          return res.json({
+            success: true,
+            wonItem: wonItem,
+            rouletteItems: rouletteItems,
+            boxId: boxId,
+            experienceGained: expGained,
+            message: `¡Has ganado: ${wonItem.name}!`
           });
+        }
+        
+        const user = userResult.rows[0];
+        let newExp = user.experience + expGained;
+        let newLevel = user.level;
+        let leveledUp = false;
+        
+        // Calcular si sube de nivel (la exp se resetea al subir)
+        while (newExp >= calculateExpForNextLevel(newLevel)) {
+          newExp -= calculateExpForNextLevel(newLevel); // Restar la exp usada
+          newLevel++;
+          leveledUp = true;
+        }
+        
+        // Actualizar nivel y experiencia
+        try {
+          await query('UPDATE users SET level = $1, experience = $2 WHERE id = $3', [newLevel, newExp, req.user.userId]);
+        } catch (expErr) {
+          console.error('Error actualizando nivel/experiencia:', expErr);
+        }
+        
+        // Generar items para la ruleta
+        const rouletteItems = generateRouletteItems(boxId, 50);
+        res.json({
+          success: true,
+          wonItem: wonItem,
+          rouletteItems: rouletteItems,
+          boxId: boxId,
+          experienceGained: expGained,
+          leveledUp: leveledUp,
+          newLevel: newLevel,
+          message: `¡Has ganado: ${wonItem.name}!${leveledUp ? ' ¡SUBISTE DE NIVEL!' : ''}`
         });
       } else {
         res.status(500).json({
@@ -273,11 +275,17 @@ router.post('/open/:id', authenticateToken, (req, res) => {
           error: "Error generando loot"
         });
       }
-    });
-  } else {
-    res.status(404).json({
+    } else {
+      res.status(404).json({
+        success: false,
+        error: "Caja no encontrada"
+      });
+    }
+  } catch (error) {
+    console.error('Error en POST /open/:id:', error);
+    res.status(500).json({
       success: false,
-      error: "Caja no encontrada"
+      error: 'Error interno del servidor'
     });
   }
 });

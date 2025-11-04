@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 
-// TEMPORAL: Hardcodear URL interna de Railway Postgres como fallback
-const RAILWAY_POSTGRES_INTERNAL = 'postgresql://postgres:xFrZeHqZFLiKDxueXJnswYodqBLBpAnI@postgres.railway.internal:5432/railway';
+// TEMPORAL: Hardcodear URL pública de Railway Postgres como fallback
+const RAILWAY_POSTGRES_PUBLIC = 'postgresql://postgres:xFrZeHqZFLiKDxueXJnswYodqBLBpAnI@switchyard.proxy.rlwy.net:29327/railway';
 
 console.log('🔍 Variables PostgreSQL disponibles:');
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Configurada ✅' : 'NO configurada ❌');
@@ -12,9 +12,9 @@ console.log('DATABASE_PUBLIC_URL:', process.env.DATABASE_PUBLIC_URL ? 'Configura
 const databaseUrl = process.env.DATABASE_URL || 
                     process.env.DATABASE_PRIVATE_URL || 
                     process.env.DATABASE_PUBLIC_URL ||
-                    RAILWAY_POSTGRES_INTERNAL;
+                    RAILWAY_POSTGRES_PUBLIC;
 
-console.log('✅ Usando estrategia de conexión:', databaseUrl === RAILWAY_POSTGRES_INTERNAL ? 'URL hardcodeada (fallback)' : 'Variable de entorno');
+console.log('✅ Usando estrategia de conexión:', databaseUrl === RAILWAY_POSTGRES_PUBLIC ? 'URL pública hardcodeada (fallback)' : 'Variable de entorno');
 
 console.log('✅ Usando conexión:', databaseUrl.replace(/:[^:@]+@/, ':****@')); // Ocultar password en logs
 

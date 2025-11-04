@@ -16,6 +16,10 @@ const http = require('http');
 const socketIO = require('socket.io');
 
 const app = express();
+
+// Confiar en el proxy de Railway para obtener la IP real del cliente
+app.set('trust proxy', 1);
+
 const server = http.createServer(app);
 
 // Configuración dinámica para desarrollo y producción

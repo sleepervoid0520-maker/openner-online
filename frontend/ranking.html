@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking - Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .ranking-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .ranking-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+        }
+
+        .ranking-tab {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid #0f3460;
+            border-bottom: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            color: #fff;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .ranking-tab:hover {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            transform: translateY(-2px);
+        }
+
+        .ranking-tab.active {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            border-color: #e94560;
+            box-shadow: 0 -5px 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .ranking-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid #0f3460;
+            border-radius: 0 10px 10px 10px;
+            padding: 20px;
+            min-height: 500px;
+        }
+
+        .ranking-section {
+            display: none;
+        }
+
+        .ranking-section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .ranking-table th {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            border: 2px solid #0f3460;
+        }
+
+        .ranking-table td {
+            padding: 12px 15px;
+            border: 1px solid #0f3460;
+            color: #fff;
+        }
+
+        .ranking-table tr:nth-child(even) {
+            background: rgba(15, 52, 96, 0.3);
+        }
+
+        .ranking-table tr:hover {
+            background: rgba(233, 69, 96, 0.2);
+            transform: scale(1.01);
+            transition: all 0.2s;
+        }
+
+        .rank-position {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #e94560;
+            text-align: center;
+            width: 60px;
+        }
+
+        .rank-1 { color: #FFD700; text-shadow: 0 0 10px #FFD700; }
+        .rank-2 { color: #C0C0C0; text-shadow: 0 0 10px #C0C0C0; }
+        .rank-3 { color: #CD7F32; text-shadow: 0 0 10px #CD7F32; }
+
+        .player-name {
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #fff;
+            font-size: 1.2em;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0000;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .back-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            border: 2px solid #e94560;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .money-value {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .level-value {
+            color: #FFA726;
+            font-weight: bold;
+        }
+
+        .weapon-info {
+            font-size: 0.9em;
+            color: #aaa;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ranking-container">
+        <button class="back-button" onclick="window.location.href='index.html'"><span data-translate="ranking_back">← Volver al Juego</span></button>
+        
+        <h1 data-translate="ranking_title">🏆 RANKING DE JUGADORES 🏆</h1>
+
+        <div class="ranking-tabs">
+            <div class="ranking-tab active" onclick="showTab('money')">
+                <span>💰 </span><span data-translate="ranking_top_money">Top Dinero</span>
+            </div>
+            <div class="ranking-tab" onclick="showTab('weapons')">
+                <span>⚔️ </span><span data-translate="ranking_top_weapons">Top Armas</span>
+            </div>
+            <div class="ranking-tab" onclick="showTab('level')">
+                <span>⭐ </span><span data-translate="ranking_top_level">Top Nivel</span>
+            </div>
+        </div>
+
+        <div class="ranking-content">
+            <!-- Top Dinero -->
+            <div id="money-ranking" class="ranking-section active">
+                <div class="loading"><span data-translate="ranking_loading">Cargando ranking</span></div>
+            </div>
+
+            <!-- Top Armas -->
+            <div id="weapons-ranking" class="ranking-section">
+                <div class="loading"><span data-translate="ranking_loading">Cargando ranking</span></div>
+            </div>
+
+            <!-- Top Nivel -->
+            <div id="level-ranking" class="ranking-section">
+                <div class="loading"><span data-translate="ranking_loading">Cargando ranking</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="translations.js"></script>
+    <script src="ranking.js?v=2"></script>
+</body>
+</html>

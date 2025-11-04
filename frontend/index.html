@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Openner Online</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 🎵 Música de fondo del juego -->
+    <audio id="background-music" loop autoplay>
+        <source src="musica/openner.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="app">
+        <!-- Pantalla de Login/Registro -->
+        <div id="auth-screen" class="screen active">
+            <div class="auth-container">
+                <div class="game-logo">
+                    <h1>Openner Online</h1>
+                </div>
+                
+                <!-- Formulario de Login -->
+                <div id="login-form" class="auth-form active">
+                    <h2 data-translate="auth_login">Iniciar Sesión</h2>
+                    <form id="login-form-element">
+                        <input type="text" id="login-username" placeholder="Usuario o Email" data-translate="auth_username" required>
+                        <input type="password" id="login-password" placeholder="Contraseña" data-translate="auth_password" required>
+                        <button type="submit" class="btn btn-primary" data-translate="auth_submit_login">Entrar</button>
+                    </form>
+                    <p class="switch-form">
+                        <span data-translate="auth_switch_register">¿No tienes cuenta?</span> <a href="#" id="show-register" data-translate="auth_register">Regístrate</a>
+                    </p>
+                </div>
+
+                <!-- Formulario de Registro -->
+                <div id="register-form" class="auth-form">
+                    <h2 data-translate="auth_register">Crear Cuenta</h2>
+                    <form id="register-form-element">
+                        <input type="text" id="register-username" placeholder="Nombre de Usuario" data-translate="auth_username" required>
+                        <input type="email" id="register-email" placeholder="Email" data-translate="auth_email" required>
+                        <input type="password" id="register-password" placeholder="Contraseña" data-translate="auth_password" required>
+                        <button type="submit" class="btn btn-primary" data-translate="auth_submit_register">Crear Cuenta</button>
+                    </form>
+                    <p class="switch-form">
+                        <span data-translate="auth_switch_login">¿Ya tienes cuenta?</span> <a href="#" id="show-login" data-translate="auth_login">Inicia Sesión</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla Principal del Juego -->
+        <div id="game-screen" class="screen">
+            <!-- Panel de Chat a la Izquierda -->
+            <div id="chat-panel" class="chat-panel">
+                <!-- Selector de Canal -->
+                <div class="chat-header">
+                    <h3>💬 Chat Global</h3>
+                    <select id="channel-selector" class="channel-selector">
+                        <option value="Español 🇪🇸">Español 🇪🇸</option>
+                        <option value="English 🇺🇸">English 🇺🇸</option>
+                        <option value="Português 🇧🇷">Português 🇧🇷</option>
+                        <option value="Français 🇫🇷">Français 🇫🇷</option>
+                        <option value="Deutsch 🇩🇪">Deutsch 🇩🇪</option>
+                        <option value="Italiano 🇮🇹">Italiano 🇮🇹</option>
+                        <option value="Русский 🇷🇺">Русский 🇷🇺</option>
+                        <option value="日本語 🇯🇵">日本語 🇯🇵</option>
+                        <option value="中文 🇨🇳">中文 🇨🇳</option>
+                        <option value="한국어 🇰🇷">한국어 🇰🇷</option>
+                        <option value="العربية 🇸🇦">العربية 🇸🇦</option>
+                        <option value="Polski 🇵🇱">Polski 🇵🇱</option>
+                        <option value="Nederlands 🇳🇱">Nederlands 🇳🇱</option>
+                        <option value="Türkçe 🇹🇷">Türkçe 🇹🇷</option>
+                        <option value="International 🌍">International 🌍</option>
+                    </select>
+                </div>
+                
+                <!-- Área de Mensajes -->
+                <div id="chat-messages" class="chat-messages">
+                    <!-- Los mensajes se cargarán aquí dinámicamente -->
+                </div>
+                
+                <!-- Input de Mensaje -->
+                <div class="chat-input-container">
+                    <input 
+                        type="text" 
+                        id="chat-input" 
+                        class="chat-input" 
+                        placeholder="Escribe un mensaje..." 
+                        data-translate="chat_input_placeholder"
+                        maxlength="200"
+                    >
+                    <button id="send-message-btn" class="send-message-btn">
+                        <span>➤</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Área superior con información del usuario -->
+            <div class="user-info-area">
+                <div class="user-display">
+                    <div class="username-section">
+                        <div id="player-icon" class="player-icon" title="Cambiar icono">
+                            <img id="player-icon-img" src="/arma/glock 17 cereza.png" alt="Icono de jugador">
+                        </div>
+                        <span id="username-display">Nick</span>
+                    </div>
+                    <div class="level-section">
+                        <span>Nivel: <span id="user-level">1</span></span>
+                    </div>
+                    <!-- Dinero del usuario debajo del nivel -->
+                    <div class="money-section" style="margin: 8px 0 0 0; text-align: left;">
+                        <span class="money-icon">💰</span>
+                        <span id="user-money">$0.00</span>
+                    </div>
+                    <div class="experience-bar-container">
+                        <div class="experience-bar">
+                            <div class="experience-fill" id="experience-fill"></div>
+                            <div class="experience-text">
+                                <span id="current-exp">0</span> / <span id="max-exp">100</span> XP
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área principal del juego -->
+            <div class="game-area">
+                <!-- Área para mostrar la caja seleccionada -->
+                <div id="selected-box-area" class="selected-box-container hidden">
+                    <div class="selected-box-display">
+                        <img id="selected-box-image" src="" alt="Caja seleccionada" class="selected-box-img">
+                        <div class="selected-box-info">
+                            <h2 id="selected-box-name" class="selected-box-title"></h2>
+                        </div>
+                        <button id="open-box-btn" class="open-box-button">ABRIR</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de navegación inferior -->
+            <div class="bottom-menu">
+                <button class="menu-btn" id="cajas-btn">
+                    <img src="iconos/cajas.png" alt="Cajas" class="menu-icon"> <span data-translate="menu_boxes">Cajas</span>
+                </button>
+                <button class="menu-btn" id="inventario-btn">
+                    <img src="iconos/inventario.png" alt="Inventario" class="menu-icon"> <span data-translate="menu_inventory">Inventario</span>
+                </button>
+                <button class="menu-btn" id="market-btn">
+                    <span class="menu-icon">🏪</span> <span data-translate="menu_market">Mercado</span>
+                </button>
+                <button class="menu-btn" id="pasivas-btn">
+                    <span class="menu-icon">⭐</span> <span data-translate="menu_passives">Pasivas</span>
+                </button>
+                <button class="menu-btn" id="open-dex-btn">
+                    <img src="iconos/dex.png" alt="DEX" class="menu-icon"> <span data-translate="menu_dex">DEX</span>
+                </button>
+                <button class="menu-btn" id="ranking-btn">
+                    <span class="menu-icon">🏆</span> <span data-translate="menu_ranking">Ranking</span>
+                </button>
+                <button class="menu-btn" id="options-btn">
+                    <span class="menu-icon">⚙️</span> <span data-translate="menu_options">Opciones</span>
+                </button>
+                <button class="menu-btn" id="logout-btn" data-translate="auth_logout">cerrar sesion</button>
+            </div>
+        </div>
+
+        <!-- Modal de Cajas -->
+        <div id="boxes-modal" class="modal">
+            <div class="modal-content boxes-modal-content">
+                <div class="modal-header">
+                    <h2><span>📦</span> <span data-translate="box_available">Cajas Disponibles</span></h2>
+                    <button class="close-modal" id="close-boxes-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="boxes-container" class="boxes-grid">
+                        <!-- Las cajas se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Apertura de Caja - Animación de Ruleta -->
+        <div id="roulette-modal" class="modal roulette-modal">
+            <div class="modal-content roulette-modal-content">
+                <!-- Panel de armas disponibles -->
+                <div class="roulette-header">
+                    <h2 id="roulette-box-name">OPENER GUNS</h2>
+                    <div class="weapons-counter-badge" id="weapons-counter-badge">
+                        <span id="weapons-count">0</span> skins disponibles
+                    </div>
+                    <div class="available-weapons-panel">
+                        <div id="weapons-slots-container" class="weapons-slots-container">
+                            <!-- Los slots de armas se generarán dinámicamente aquí -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenedor de la ruleta -->
+                <div class="roulette-container">
+                    <div class="roulette-viewport">
+                        <!-- Indicador central mejorado con iluminación de slot -->
+                        <div class="roulette-indicator-highlight"></div>
+                        <div class="roulette-indicator"></div>
+                        <div class="roulette-indicator-arrow"></div>
+                        <!-- Pista de la ruleta -->
+                        <div id="roulette-track" class="roulette-track">
+                            <!-- Los items se generarán dinámicamente aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer de controles siempre visible -->
+            <div class="roulette-controls-modal">
+                <button id="open-again-btn" class="open-again-btn hidden">ABRIR</button>
+                <button id="exit-roulette-btn" class="exit-roulette-btn hidden">SALIR</button>
+            </div>
+        </div>
+
+        <!-- Modal de Resultado - Arma Ganadora -->
+        <div id="weapon-result-modal" class="modal weapon-result-modal">
+            <div class="modal-content weapon-result-content">
+                <div class="weapon-result-container">
+                    <!-- Animación del arma ganadora -->
+                    <div class="weapon-result-animation">
+                        <div class="result-glow"></div>
+                        <div class="weapon-showcase">
+                            <img id="result-weapon-image" src="" alt="Arma ganadora" class="result-weapon-img">
+                        </div>
+                    </div>
+                    
+                    <!-- Información del arma -->
+                    <div class="weapon-result-info">
+                        <h2 id="result-weapon-name" class="result-weapon-name">AK-47 Redline</h2>
+                        <div class="weapon-details">
+                            <div id="result-weapon-rarity" class="result-weapon-rarity legendario">LEGENDARIO</div>
+                            <div class="weapon-price-section">
+                                <span class="price-label">Precio de venta:</span>
+                                <div id="result-weapon-price" class="result-weapon-price">$1,250.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div class="weapon-result-actions">
+                        <button id="take-weapon-btn" class="weapon-action-btn take-weapon-btn">
+                            <span class="btn-icon">🎒</span>
+                            TOMAR
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Inventario -->
+        <div id="inventory-modal" class="modal inventory-modal">
+            <div class="modal-content inventory-modal-content">
+                <div class="modal-header">
+                    <h2><span data-translate="inventory_title">🎒 Mi Inventario</span></h2>
+                    <button class="close-modal" id="close-inventory-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="inventory-stats">
+                        <div class="inventory-money">
+                            <span class="money-icon">💰</span>
+                            <span data-translate="inventory_money">Dinero</span>: <span id="inventory-money-display">$0.00</span>
+                        </div>
+                        <div class="inventory-count">
+                            <span data-translate="inventory_items">Objetos</span>: <span id="inventory-count">0</span>
+                        </div>
+                        <button id="sell-all-btn" class="sell-all-btn">
+                            <span class="btn-icon">💸</span>
+                            <span data-translate="inventory_sell_all">VENDER TODO</span>
+                        </button>
+                    </div>
+
+                    <!-- Filtros del inventario -->
+                    <div class="inventory-filters">
+                        <div class="filter-group">
+                            <label>🔍 <span data-translate="inventory_search_label">Buscar</span>:</label>
+                            <input type="text" id="inventory-search" class="filter-search-input" data-translate="inventory_search" placeholder="Buscar por nombre...">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>🔫 <span data-translate="inventory_weapon_type">Tipo de Arma</span>:</label>
+                            <div class="filter-buttons" id="inventory-weapon-type-filters">
+                                <button class="filter-btn active" data-value="" data-translate="inventory_filter_all">Todas</button>
+                                <button class="filter-btn" data-value="Pistola" data-translate="weapon_type_pistol">Pistola</button>
+                                <button class="filter-btn" data-value="Rifle" data-translate="weapon_type_rifle">Rifle</button>
+                                <button class="filter-btn" data-value="SMG" data-translate="weapon_type_smg">SMG</button>
+                                <button class="filter-btn" data-value="Escopeta" data-translate="weapon_type_shotgun">Escopeta</button>
+                                <button class="filter-btn" data-value="Sniper Rifle" data-translate="weapon_type_sniper">Sniper</button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>✨ <span data-translate="inventory_rarity">Rareza</span>:</label>
+                            <div class="filter-buttons" id="inventory-rarity-filters">
+                                <button class="filter-btn active" data-value="" data-translate="inventory_filter_all">Todas</button>
+                                <button class="filter-btn rarity-common" data-value="COMUN" data-translate="rarity_common">Común</button>
+                                <button class="filter-btn rarity-uncommon" data-value="POCO_COMUN" data-translate="rarity_uncommon">Poco Común</button>
+                                <button class="filter-btn rarity-rare" data-value="RARO" data-translate="rarity_rare">Raro</button>
+                                <button class="filter-btn rarity-epic" data-value="EPICO" data-translate="rarity_epic">Épico</button>
+                                <button class="filter-btn rarity-legendary" data-value="LEGENDARIO" data-translate="rarity_legendary">Legendario</button>
+                                <button class="filter-btn rarity-mythic" data-value="MITICO" data-translate="rarity_mythic">Mítico</button>
+                                <button class="filter-btn rarity-ancestral" data-value="ANCESTRAL" data-translate="rarity_ancestral">Ancestral</button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>📊 <span data-translate="inventory_quality">Grado</span>:</label>
+                            <div class="filter-buttons" id="inventory-quality-filters">
+                                <button class="filter-btn active" data-value="" data-translate="inventory_filter_all">Todos</button>
+                                <button class="filter-btn" data-value="F">F</button>
+                                <button class="filter-btn" data-value="E">E</button>
+                                <button class="filter-btn" data-value="D">D</button>
+                                <button class="filter-btn" data-value="C">C</button>
+                                <button class="filter-btn" data-value="B">B</button>
+                                <button class="filter-btn" data-value="A">A</button>
+                                <button class="filter-btn" data-value="S">S</button>
+                                <button class="filter-btn" data-value="M">M</button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>⚡ <span data-translate="inventory_conta">Conta</span>:</label>
+                            <div class="filter-buttons" id="inventory-conta-filters">
+                                <button class="filter-btn active" data-value="" data-translate="inventory_filter_all">Todas</button>
+                                <button class="filter-btn" data-value="1" data-translate="inventory_conta_only">Solo Conta</button>
+                                <button class="filter-btn" data-value="0" data-translate="inventory_conta_none">Sin Conta</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="inventory-container" class="inventory-grid">
+                        <!-- Los objetos del inventario se cargarán aquí -->
+                    </div>
+                    <div id="inventory-empty" class="inventory-empty hidden">
+                        <div class="empty-icon">📦</div>
+                        <p data-translate="inventory_empty">Tu inventario está vacío</p>
+                        <p data-translate="inventory_empty_hint">¡Abre algunas cajas para obtener armas!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Pasivas -->
+        <div id="passives-modal" class="modal passives-modal">
+            <div class="modal-content passives-modal-content">
+                <div class="modal-header">
+                    <h2><span data-translate="passives_title">⭐ MIS ESTADÍSTICAS PASIVAS</span></h2>
+                    <button class="close-modal" id="close-passives-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="passives-container">
+                        <div class="passives-description">
+                            <p><span data-translate="passives_description">✨ Las pasivas se activan automáticamente con cada arma común que obtienes ✨</span></p>
+                        </div>
+                        
+                        <!-- Estadísticas del jugador -->
+                        <div class="player-passive-stats">
+                            <h3><span data-translate="passives_current_bonuses">📊 TUS BONIFICACIONES ACTUALES</span></h3>
+                            <div class="passive-stats-grid">
+                                <div class="passive-stat-item">
+                                    <div class="stat-icon">💰</div>
+                                    <div class="stat-info">
+                                        <div class="stat-name" data-translate="passive_sell_value">Valor de Venta</div>
+                                        <div class="stat-value" id="mayor-costo-armas-value">+0%</div>
+                                        <div class="stat-description" data-translate="passive_sell_value_desc">Bonificación al precio de venta de armas</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="passive-stat-item">
+                                    <div class="stat-icon">🍀</div>
+                                    <div class="stat-info">
+                                        <div class="stat-name" data-translate="passive_luck">Suerte</div>
+                                        <div class="stat-value" id="suerte-value">0</div>
+                                        <div class="stat-description" data-translate="passive_luck_desc">Mayor probabilidad de armas raras y épicas</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="passive-stat-item">
+                                    <div class="stat-icon">📦</div>
+                                    <div class="stat-info">
+                                        <div class="stat-name" data-translate="passive_box_discount">Descuento en Cajas</div>
+                                        <div class="stat-value" id="menor-costo-cajas-value">0%</div>
+                                        <div class="stat-description" data-translate="passive_box_discount_desc">Reducción del costo al abrir cajas</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="passive-stat-item">
+                                    <div class="stat-icon">⭐</div>
+                                    <div class="stat-info">
+                                        <div class="stat-name" data-translate="passive_extra_exp">Experiencia Extra</div>
+                                        <div class="stat-value" id="mayor-exp-caja-value">+0%</div>
+                                        <div class="stat-description" data-translate="passive_extra_exp_desc">Bonificación de EXP al abrir cajas</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="passive-stat-item">
+                                    <div class="stat-icon">🎯</div>
+                                    <div class="stat-info">
+                                        <div class="stat-name" data-translate="passive_grade_improvement">Mejora de Grado</div>
+                                        <div class="stat-value" id="mayor-probabilidad-grado-value">+0</div>
+                                        <div class="stat-description" data-translate="passive_grade_improvement_desc">Mayor probabilidad de grados superiores (A, S, M)</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="passive-stat-item">
+                                    <div class="stat-icon">⏱️</div>
+                                    <div class="stat-info">
+                                        <div class="stat-name" data-translate="passive_income">Ingresos Pasivos</div>
+                                        <div class="stat-value" id="dinero-por-segundo-value">$0.00/s</div>
+                                        <div class="stat-description" data-translate="passive_income_desc">Dinero generado automáticamente cada segundo</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="passive-stat-item">
+                                    <div class="stat-icon">📈</div>
+                                    <div class="stat-info">
+                                        <div class="stat-name" data-translate="passive_income_percent">Ingresos Pasivos %</div>
+                                        <div class="stat-value" id="dinero-por-segundo-porcentaje-value">+0%</div>
+                                        <div class="stat-description" data-translate="passive_income_percent_desc">Bonificación porcentual a los ingresos pasivos</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="passives-list" class="passives-list">
+                            <!-- Las pasivas se muestran arriba como estadísticas totales -->
+                            <p style="text-align: center; color: rgba(78, 205, 196, 0.7); margin: 20px 0; font-size: 1rem; font-style: italic;">
+                                <span data-translate="passive_tip">💡 Consejo: Colecciona armas comunes para aumentar tus pasivas stackeables</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Perfil del Jugador -->
+        <div id="player-menu-modal" class="modal player-menu-modal">
+            <div class="modal-content player-menu-content">
+                <div class="player-menu-header">
+                    <h2>📊 Perfil del Jugador</h2>
+                    <button class="close-modal" id="close-player-menu">&times;</button>
+                </div>
+                <div class="player-menu-body">
+                    <!-- Sección de Armas Más Caras -->
+                    <div class="top-weapons-section">
+                        <h3>💎 Tus 3 Armas Más Caras</h3>
+                        <div class="top-weapons-grid" id="top-weapons-grid">
+                            <!-- Las armas se cargarán dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Sección de Cambio de Icono y Bordes -->
+                    <div class="change-icon-section">
+                        <button id="open-icon-selector-btn" class="change-icon-btn">
+                            � Cambiar Icono de Perfil
+                        </button>
+                        <button id="open-border-selector-btn" class="change-icon-btn">
+                            🎨 Cambiar Borde de Perfil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Selección de Iconos -->
+        <div id="icon-selector-modal" class="modal icon-selector-modal">
+            <div class="modal-content icon-selector-content">
+                <div class="icon-selector-header">
+                    <h2>🎯 Seleccionar Icono de Perfil</h2>
+                    <button class="close-modal" id="close-icon-selector">&times;</button>
+                </div>
+                <div class="icon-selector-body">
+                    <div id="icons-grid" class="icons-grid">
+                        <!-- Los iconos se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Selección de Bordes -->
+        <div id="border-selector-modal" class="modal border-selector-modal">
+            <div class="modal-content border-selector-content">
+                <div class="border-selector-header">
+                    <h2>🎨 Seleccionar Borde de Perfil</h2>
+                    <button class="close-modal" id="close-border-selector">&times;</button>
+                </div>
+                <div class="border-selector-body">
+                    <div id="borders-grid" class="borders-grid">
+                        <!-- Los bordes se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal DEX (Codex de Armas) -->
+        <div id="dex-modal" class="modal dex-modal">
+            <div class="dex-modal-content">
+                <!-- Botón Cerrar (X) arriba a la derecha -->
+                <button class="close-modal" id="close-dex-modal">&times;</button>
+                
+                <!-- Header -->
+                <div class="dex-header">
+                    <h2 id="dex-title"><span data-translate="dex_title">📚 DEX - Codex de Armas</span></h2>
+                    <button id="dex-back-btn" class="dex-back-btn">
+                        <span data-translate="dex_back">← Volver</span>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="dex-body">
+                    <!-- Vista de Categorías -->
+                    <div id="dex-categories-view" class="dex-view active">
+                        <div id="dex-categories-container" class="dex-categories-container">
+                            <!-- Las categorías se cargarán aquí dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Vista de Armas -->
+                    <div id="dex-weapons-view" class="dex-view">
+                        <div id="dex-weapons-container" class="dex-weapons-container">
+                            <!-- Las armas se cargarán aquí dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Opciones -->
+        <div id="options-modal" class="modal">
+            <div class="modal-content">
+                <button class="close-modal" id="close-options-modal">&times;</button>
+                <h2><span>⚙️</span> <span data-translate="options_title">Opciones</span></h2>
+
+                <div class="options-container">
+                    <!-- Control de volumen de música -->
+                    <div class="option-group">
+                        <label for="music-volume"><span>🎵</span> <span data-translate="options_music_volume">Volumen de Música</span></label>
+                        <div class="volume-control">
+                            <input type="range" id="music-volume" min="0" max="100" value="15" class="volume-slider">
+                            <span id="music-volume-value" class="volume-value">15%</span>
+                        </div>
+                    </div>
+
+                    <!-- Control de volumen de efectos -->
+                    <div class="option-group">
+                        <label for="sfx-volume"><span>🔊</span> <span data-translate="options_sfx_volume">Volumen de Efectos</span></label>
+                        <div class="volume-control">
+                            <input type="range" id="sfx-volume" min="0" max="100" value="30" class="volume-slider">
+                            <span id="sfx-volume-value" class="volume-value">30%</span>
+                        </div>
+                    </div>
+
+                    <!-- Selector de idioma -->
+                    <div class="option-group">
+                        <label for="language-select"><span>🌍</span> <span data-translate="options_language">Idioma</span></label>
+                        <div class="language-select-container">
+                            <select id="language-select" class="language-select">
+                                <option value="es">🇪🇸 Español</option>
+                                <option value="en">🇺🇸 English</option>
+                                <option value="ru">🇷🇺 Русский</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Detalle de Item del Inventario -->
+        <div id="item-detail-modal" class="modal item-detail-modal">
+            <div class="modal-content item-detail-content">
+                <div class="item-detail-container">
+                    <!-- Lado izquierdo: Showcase del arma -->
+                    <div class="item-showcase">
+                        <img id="detail-item-image" src="" alt="Objeto" class="detail-item-img">
+                    </div>
+                    
+                    <!-- Lado derecho: Información completa -->
+                    <div class="item-info">
+                        <div class="item-info-header">
+                            <h2 id="detail-item-name" class="detail-item-name">Nombre del Arma</h2>
+                            <div class="rarity-lock-container">
+                                <div id="detail-item-rarity" class="detail-item-rarity">RAREZA</div>
+                                <button id="lock-toggle-btn" class="lock-toggle-btn" data-translate="inventory_lock_toggle" data-translate-attr="title" title="Bloquear/Desbloquear">
+                                    <span class="lock-icon">🔓</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="item-info-body">
+                            <div class="detail-item-price">
+                                <span class="price-label" data-translate="inventory_sell_price">PRECIO DE VENTA:</span>
+                                <div class="price-container">
+                                    <div id="detail-item-price-value" class="detail-price-value">$0.00</div>
+                                    <span style="color: #4ecdc4; font-size: 1.2rem; margin: 0 0.5rem;">→</span>
+                                    <div id="detail-item-price-with-bonus" class="detail-price-with-bonus">$0.00</div>
+                                </div>
+                                <div id="detail-item-bonus-info" class="detail-bonus-info">Sin pasiva aplicada</div>
+                            </div>
+                            
+                            <!-- Nueva sección de pasiva -->
+                            <div class="item-passive-section">
+                                <h3 class="passive-section-title" data-translate="inventory_passive_section">PASIVA DEL ARMA</h3>
+                                <div class="passive-content">
+                                    <div class="passive-info">
+                                        <div class="passive-name" id="detail-item-passive-name">Sin pasiva</div>
+                                        <div class="passive-description" id="detail-item-passive-description">Esta arma no tiene efectos pasivos.</div>
+                                        <div class="passive-stackable" id="detail-item-passive-stackable">
+                                            <span class="stackable-icon">🔄</span>
+                                            <span class="stackable-text">No apilable</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="item-obtained">
+                                <span data-translate="inventory_obtained_date">Obtenido el:</span>
+                                <span id="detail-item-date">fecha</span>
+                            </div>
+                        </div>
+                        
+                        <div class="item-detail-actions">
+                            <button id="use-item-btn" class="use-item-btn" style="display: none;">
+                                <span class="btn-icon">⚡</span>
+                                <span data-translate="inventory_use">USAR</span>
+                            </button>
+                            <button id="sell-item-btn" class="sell-item-btn">
+                                <span class="btn-icon">💰</span>
+                                <span data-translate="inventory_sell">VENDER</span>
+                            </button>
+                            <button id="close-item-detail" class="close-item-detail-btn">
+                                <span class="btn-icon">✕</span>
+                                <span data-translate="inventory_close">CERRAR</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Perfil de Otro Jugador -->
+        <div id="player-profile-modal" class="modal">
+            <div class="modal-content player-profile-modal-content">
+                <div class="modal-header">
+                    <h2 id="profile-player-username">Jugador</h2>
+                    <button class="close-modal" id="close-player-profile">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="player-profile-container">
+                        <!-- Información del jugador -->
+                        <div class="profile-player-info">
+                            <div class="profile-level-badge">
+                                <span>Nivel</span>
+                                <span id="profile-player-level" class="level-number">1</span>
+                            </div>
+                            <div class="profile-money-display">
+                                <span class="money-icon">💰</span>
+                                <span id="profile-player-money">$0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Top 3 Mejores Armas -->
+                        <div class="profile-top-weapons-section">
+                            <h3>⭐ Top 3 Mejores Armas</h3>
+                            <div id="profile-top-weapons-grid" class="profile-top-weapons-grid">
+                                <!-- Se llenarán dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal del Mercado -->
+        <div id="market-modal" class="modal market-modal">
+            <div class="modal-content market-modal-content">
+                <div class="market-header">
+                    <h2><span data-translate="market_title">🏪 MERCADO DE ARMAS</span></h2>
+                    <button class="close-modal" id="close-market-modal">&times;</button>
+                </div>
+                
+                <!-- Pestañas de Compra/Venta -->
+                <div class="market-tabs">
+                    <button class="market-tab active" data-tab="buy">
+                        <span class="tab-icon">🛒</span> <span data-translate="market_buy">COMPRAR</span>
+                    </button>
+                    <button class="market-tab" data-tab="sell">
+                        <span class="tab-icon">💰</span> <span data-translate="market_sell">VENDER</span>
+                    </button>
+                </div>
+
+                <!-- Contenido de la pestaña COMPRAR -->
+                <div id="buy-tab-content" class="market-tab-content active">
+                    <!-- Filtros y búsqueda -->
+                    <div class="market-filters">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label>🔍 <span data-translate="market_search_label">Buscar</span>:</label>
+                                <input type="text" id="market-search" data-translate="market_search" placeholder="Buscar por nombre..." class="market-search-input">
+                            </div>
+                            <div class="filter-group">
+                                <label>📦 <span data-translate="market_type">Tipo</span>:</label>
+                                <select id="filter-weapon-type" class="market-filter-select">
+                                    <option value="" data-translate="market_filter_all">Todos</option>
+                                    <option value="Pistola" data-translate="weapon_type_pistol">Pistola</option>
+                                    <option value="Rifle" data-translate="weapon_type_rifle">Rifle</option>
+                                    <option value="SMG" data-translate="weapon_type_smg">SMG</option>
+                                    <option value="LMG" data-translate="weapon_type_lmg">LMG</option>
+                                    <option value="Escopeta" data-translate="weapon_type_shotgun">Escopeta</option>
+                                    <option value="Sniper Rifle" data-translate="weapon_type_sniper">Sniper</option>
+                                    <option value="Borde">🎨 Bordes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label>✨ <span data-translate="market_rarity">Rareza</span>:</label>
+                                <select id="filter-rarity" class="market-filter-select">
+                                    <option value="" data-translate="market_filter_all">Todas</option>
+                                    <option value="Común" data-translate="rarity_common">Común</option>
+                                    <option value="Poco Común" data-translate="rarity_uncommon">Poco Común</option>
+                                    <option value="Raro" data-translate="rarity_rare">Raro</option>
+                                    <option value="Épico" data-translate="rarity_epic">Épico</option>
+                                    <option value="Legendario" data-translate="rarity_legendary">Legendario</option>
+                                    <option value="Mítico" data-translate="rarity_mythic">Mítico</option>
+                                    <option value="Ancestral" data-translate="rarity_ancestral">Ancestral</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>⚔️ <span data-translate="market_quality">Grado</span>:</label>
+                                <select id="filter-quality" class="market-filter-select">
+                                    <option value="" data-translate="market_filter_all">Todos</option>
+                                    <option value="E">E</option>
+                                    <option value="F">F</option>
+                                    <option value="D">D</option>
+                                    <option value="C">C</option>
+                                    <option value="B">B</option>
+                                    <option value="A">A</option>
+                                    <option value="S">S</option>
+                                    <option value="M">M</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>🔥 <span data-translate="market_conta">Conta</span>:</label>
+                                <select id="filter-conta" class="market-filter-select">
+                                    <option value="" data-translate="market_filter_all">Todas</option>
+                                    <option value="1" data-translate="market_conta_only">Solo Conta</option>
+                                    <option value="0" data-translate="market_conta_none">Solo Normales</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>💵 <span data-translate="market_sort">Ordenar</span>:</label>
+                                <select id="filter-sort" class="market-filter-select">
+                                    <option value="newest" data-translate="market_sort_newest">Más Recientes</option>
+                                    <option value="price_asc" data-translate="market_sort_lowest">Menor Precio</option>
+                                    <option value="price_desc" data-translate="market_sort_highest">Mayor Precio</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Listado de armas en venta -->
+                    <div class="market-listings-container">
+                        <div id="market-listings-grid" class="market-listings-grid">
+                            <!-- Las armas se cargarán dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenido de la pestaña VENDER -->
+                <div id="sell-tab-content" class="market-tab-content">
+                    <div class="sell-instructions">
+                        <h3>📋 <span data-translate="market_how_to_sell">Cómo vender</span></h3>
+                        <p data-translate="market_sell_instructions">Selecciona un arma de tu inventario para ponerla en venta en el mercado.</p>
+                        <p class="min-price-info">💰 <span data-translate="market_min_price">Precio mínimo de venta</span>: <strong>$0.0001</strong></p>
+                    </div>
+
+                    <!-- Pestañas para Mis Ventas / Mi Inventario -->
+                    <div class="sell-sub-tabs">
+                        <button class="sell-sub-tab active" data-subtab="inventory" data-translate="market_my_inventory">Mi Inventario</button>
+                        <button class="sell-sub-tab" data-subtab="listings" data-translate="market_my_listings">Mis Ventas Activas</button>
+                    </div>
+
+                    <!-- Inventario para vender -->
+                    <div id="sell-inventory-content" class="sell-sub-content active">
+                        <!-- Filtros para el inventario de venta -->
+                        <div class="inventory-filters">
+                            <div class="filter-group">
+                                <label>🔍 Buscar:</label>
+                                <input type="text" id="sell-search" class="filter-search-input" placeholder="Buscar por nombre...">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label>🔫 Tipo de Arma:</label>
+                                <div class="filter-buttons" id="sell-weapon-type-filters">
+                                    <button class="filter-btn active" data-value="">Todas</button>
+                                    <button class="filter-btn" data-value="Pistola">Pistola</button>
+                                    <button class="filter-btn" data-value="Rifle">Rifle</button>
+                                    <button class="filter-btn" data-value="SMG">SMG</button>
+                                    <button class="filter-btn" data-value="LMG">LMG</button>
+                                    <button class="filter-btn" data-value="Escopeta">Escopeta</button>
+                                    <button class="filter-btn" data-value="Sniper Rifle">Sniper</button>
+                                    <button class="filter-btn" data-value="Borde">🎨 Bordes</button>
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>✨ Rareza:</label>
+                                <div class="filter-buttons" id="sell-rarity-filters">
+                                    <button class="filter-btn active" data-value="">Todas</button>
+                                    <button class="filter-btn rarity-common" data-value="COMUN">Común</button>
+                                    <button class="filter-btn rarity-uncommon" data-value="POCO_COMUN">Poco Común</button>
+                                    <button class="filter-btn rarity-rare" data-value="RARO">Raro</button>
+                                    <button class="filter-btn rarity-epic" data-value="EPICO">Épico</button>
+                                    <button class="filter-btn rarity-legendary" data-value="LEGENDARIO">Legendario</button>
+                                    <button class="filter-btn rarity-mythic" data-value="MITICO">Mítico</button>
+                                    <button class="filter-btn rarity-ancestral" data-value="ANCESTRAL">Ancestral</button>
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>📊 Grado:</label>
+                                <div class="filter-buttons" id="sell-quality-filters">
+                                    <button class="filter-btn active" data-value="">Todos</button>
+                                    <button class="filter-btn" data-value="F">F</button>
+                                    <button class="filter-btn" data-value="E">E</button>
+                                    <button class="filter-btn" data-value="D">D</button>
+                                    <button class="filter-btn" data-value="C">C</button>
+                                    <button class="filter-btn" data-value="B">B</button>
+                                    <button class="filter-btn" data-value="A">A</button>
+                                    <button class="filter-btn" data-value="S">S</button>
+                                    <button class="filter-btn" data-value="M">M</button>
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>⚡ Conta:</label>
+                                <div class="filter-buttons" id="sell-conta-filters">
+                                    <button class="filter-btn active" data-value="">Todas</button>
+                                    <button class="filter-btn" data-value="1">Solo Conta</button>
+                                    <button class="filter-btn" data-value="0">Sin Conta</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="sell-inventory-grid" class="sell-inventory-grid">
+                            <!-- Las armas del inventario se cargarán aquí -->
+                        </div>
+                    </div>
+
+                    <!-- Mis ventas activas -->
+                    <div id="my-listings-content" class="sell-sub-content">
+                        <div id="my-listings-grid" class="my-listings-grid">
+                            <!-- Las ventas activas se cargarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para vender un item -->
+        <div id="sell-item-modal" class="modal sell-item-modal">
+            <div class="modal-content sell-item-content">
+                <button class="close-modal" id="close-sell-item-modal">&times;</button>
+                <div class="sell-item-container">
+                    <div class="sell-item-showcase">
+                        <img id="sell-item-image" src="" alt="Item" class="sell-item-img">
+                    </div>
+                    <div class="sell-item-info">
+                        <h2 id="sell-item-name">Nombre del Arma</h2>
+                        <div id="sell-item-rarity" class="sell-item-rarity">RAREZA</div>
+                        <div id="sell-item-quality" class="sell-item-quality"></div>
+                        
+                        <div class="lowest-price-info">
+                            <p>💹 Precio más bajo en el mercado:</p>
+                            <p id="lowest-market-price" class="lowest-price">Cargando...</p>
+                        </div>
+
+                        <div class="price-input-group">
+                            <label for="sell-price-input">💵 Precio de venta:</label>
+                            <div class="price-input-container">
+                                <span class="currency-symbol">$</span>
+                                <input type="number" id="sell-price-input" step="0.0001" min="0.0001" placeholder="0.0001">
+                            </div>
+                        </div>
+
+                        <div class="sell-actions">
+                            <button id="confirm-sell-btn" class="confirm-sell-btn">VENDER EN EL MERCADO</button>
+                            <button id="cancel-sell-btn" class="cancel-sell-btn">CANCELAR</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de confirmación de compra -->
+        <div id="buy-confirm-modal" class="modal buy-confirm-modal">
+            <div class="modal-content buy-confirm-content">
+                <h2>🛒 Confirmar Compra</h2>
+                <div class="buy-confirm-details">
+                    <img id="buy-confirm-image" src="" alt="Item" class="buy-confirm-img">
+                    <div class="buy-confirm-info">
+                        <h3 id="buy-confirm-name">Nombre</h3>
+                        <p id="buy-confirm-rarity" class="buy-confirm-rarity"></p>
+                        <p id="buy-confirm-seller">Vendedor: <span></span></p>
+                        <p id="buy-confirm-price" class="buy-confirm-price">Precio: <span></span></p>
+                    </div>
+                </div>
+                <div class="buy-confirm-actions">
+                    <button id="confirm-buy-btn" class="confirm-buy-btn">✅ CONFIRMAR COMPRA</button>
+                    <button id="cancel-buy-btn" class="cancel-buy-btn">❌ CANCELAR</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Saldo Insuficiente -->
+        <div id="insufficient-balance-modal" class="modal">
+            <div class="modal-content insufficient-balance-modal-content">
+                <div class="insufficient-balance-container">
+                    <div class="insufficient-balance-icon">💸</div>
+                    <h2>Saldo Insuficiente</h2>
+                    <p>No tienes suficiente dinero para abrir esta caja.</p>
+                    <div class="insufficient-balance-actions">
+                        <button id="close-insufficient-balance" class="close-insufficient-btn">CERRAR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading" class="loading-overlay">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Cargando...</p>
+            </div>
+        </div>
+
+        <!-- Notificaciones -->
+        <div id="notifications"></div>
+
+        <!-- Modal de Confirmación General -->
+        <div id="confirm-modal" class="modal confirm-modal">
+            <div class="modal-content confirm-modal-content">
+                <div class="confirm-icon" id="confirm-icon">⚠️</div>
+                <h2 id="confirm-title">Confirmar acción</h2>
+                <p id="confirm-message">¿Estás seguro?</p>
+                <div class="confirm-buttons">
+                    <button id="confirm-accept-btn" class="confirm-btn accept-btn">Aceptar</button>
+                    <button id="confirm-cancel-btn" class="confirm-btn cancel-btn">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Ranking -->
+        <div id="ranking-modal" class="modal ranking-modal">
+            <div class="modal-content ranking-modal-content">
+                <div class="modal-header">
+                    <h2 data-translate="ranking_title">🏆 RANKING DE JUGADORES</h2>
+                    <button class="close-modal" id="close-ranking-modal">&times;</button>
+                </div>
+
+                <div class="ranking-tabs">
+                    <button class="ranking-tab active" data-tab="money">
+                        <span>💰 </span><span data-translate="ranking_top_money">Top Dinero</span>
+                    </button>
+                    <button class="ranking-tab" data-tab="weapons">
+                        <span>⚔️ </span><span data-translate="ranking_top_weapons">Top Armas</span>
+                    </button>
+                    <button class="ranking-tab" data-tab="level">
+                        <span>⭐ </span><span data-translate="ranking_top_level">Top Nivel</span>
+                    </button>
+                </div>
+
+                <div class="ranking-content">
+                    <!-- Top Dinero -->
+                    <div id="money-ranking" class="ranking-section active">
+                        <div class="loading-ranking" data-translate="ranking_loading">Cargando ranking...</div>
+                    </div>
+
+                    <!-- Top Armas -->
+                    <div id="weapons-ranking" class="ranking-section">
+                        <div class="loading-ranking" data-translate="ranking_loading">Cargando ranking...</div>
+                    </div>
+
+                    <!-- Top Nivel -->
+                    <div id="level-ranking" class="ranking-section">
+                        <div class="loading-ranking" data-translate="ranking_loading">Cargando ranking...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="sounds.js"></script>
+    <script src="translations.js"></script>
+    <script src="armas.js"></script>
+    <script src="stats.js"></script>
+    <script src="icon-system.js"></script>
+    <script src="border-system.js"></script>
+    <script src="dex.js"></script>
+    <script src="player-profile.js"></script>
+    <script src="chat.js"></script>
+    <script src="market.js"></script>
+    <script src="game.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>

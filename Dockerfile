@@ -3,8 +3,8 @@
 # Usar imagen oficial de Node.js LTS
 FROM node:18-alpine
 
-# Instalar dependencias necesarias para SQLite
-RUN apk add --no-cache python3 make g++ sqlite
+# Instalar dependencias necesarias para SQLite y compilación
+RUN apk add --no-cache python3 py3-setuptools make g++ sqlite
 
 # Crear directorio de trabajo
 WORKDIR /app

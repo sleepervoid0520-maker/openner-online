@@ -42,29 +42,17 @@ router.post('/register', async (req, res) => {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
       [
         username, email, hashedPassword, defaultIcons,
-        1, 0, 1000, // level, experience, money inicial
+  1, 0, 0, // level, experience, money inicial
         0, 0, 0,    // mayor_costo_armas, suerte, menor_costo_cajas_percent
         0, 0,       // mayor_exp_caja_percent, mayor_probabilidad_grado
         0, 0        // dinero_por_segundo, dinero_por_segundo_porcentaje
       ]
     );
 
-    const newUserId = result.rows[0].id;
-    const token = jwt.sign({ userId: newUserId, username }, JWT_SECRET, { expiresIn: '7d' });
-
+    // No devolver token ni loguear automáticamente
     res.json({
       success: true,
-      message: 'Usuario creado exitosamente',
-      token,
-      user: {
-        id: newUserId,
-        username,
-        email,
-        level: 1,
-        experience: 0,
-        money: 1000,
-        created_at: new Date().toISOString()
-      }
+      message: 'Registro exitoso. Ahora puedes iniciar sesión.'
     });
   } catch (error) {
     console.error('Error en registro:', error);

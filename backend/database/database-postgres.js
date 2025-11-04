@@ -84,6 +84,7 @@ async function initializeDatabase() {
         final_price DECIMAL(10,2),
         pasiva_tipo TEXT,
         pasiva_valor DECIMAL(10,4),
+        pasiva_json TEXT,
         pasiva_stackeable INTEGER DEFAULT 0,
         is_conta INTEGER DEFAULT 0,
         weapon_type TEXT,

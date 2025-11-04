@@ -263,14 +263,21 @@ router.post('/add', authenticateToken, async (req, res) => {
     const actualPrice = finalPrice || weaponPrice;
     const isContaValue = isConta ? 1 : 0;
     
-    // Procesar pasiva
-    const pasivaData = pasiva ? JSON.stringify(pasiva) : null;
-    
+    // Procesar pasiva: guardar valor numérico y JSON completo
+    let pasivaValor = null;
+    let pasivaJson = null;
+    if (pasiva) {
+      pasivaJson = JSON.stringify(pasiva);
+      // Si existe pasiva.valor y es numérico, lo guardamos en pasiva_valor
+      if (typeof pasiva.valor === 'number') {
+        pasivaValor = pasiva.valor;
+      }
+    }
     const insertResult = await query(`
-      INSERT INTO inventory (user_id, weapon_id, name, rarity, price, image, quality, final_price, is_conta, weapon_type, pasiva_tipo, pasiva_valor, pasiva_stackeable)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      INSERT INTO inventory (user_id, weapon_id, name, rarity, price, image, quality, final_price, is_conta, weapon_type, pasiva_tipo, pasiva_valor, pasiva_json, pasiva_stackeable)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING id
-    `, [userId, weaponId, weaponName, rarityData, weaponPrice, weaponImage, qualityData, actualPrice, isContaValue, weaponType || null, pasiva?.tipo || null, pasivaData, pasiva?.stackeable ? 1 : 0]);
+    `, [userId, weaponId, weaponName, rarityData, weaponPrice, weaponImage, qualityData, actualPrice, isContaValue, weaponType || null, pasiva?.tipo || null, pasivaValor, pasivaJson, pasiva?.stackeable ? 1 : 0]);
     
     const inventoryId = insertResult.rows[0].id;
     

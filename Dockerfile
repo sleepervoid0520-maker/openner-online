@@ -12,9 +12,9 @@ WORKDIR /app
 # Copiar package.json del backend
 COPY backend/package*.json ./backend/
 
-# Instalar dependencias de producción
+# Instalar dependencias de producción y reconstruir sqlite3
 WORKDIR /app/backend
-RUN npm ci --only=production
+RUN npm ci --only=production && npm rebuild sqlite3 --build-from-source
 
 # Copiar todo el código
 WORKDIR /app

@@ -1,6 +1,12 @@
 // Cargar variables de entorno
 require('dotenv').config();
 
+// Debug: Verificar variables de entorno en Railway
+console.log('🔍 DEBUG - Variables de entorno:');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ Configurada' : '❌ NO configurada');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');

@@ -32,8 +32,9 @@ class WeaponDex {
     async loadUnlockedWeapons() {
         try {
             const token = localStorage.getItem('authToken');
+            const API_URL = window.API_CONFIG?.API_URL || 'http://localhost:3000/api';
             
-            const response = await fetch('http://localhost:3000/api/dex/unlocked', {
+            const response = await fetch(`${API_URL}/dex/unlocked`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -61,7 +62,8 @@ class WeaponDex {
     async saveUnlockedWeapons() {
         try {
             const token = localStorage.getItem('authToken');
-            const response = await fetch('http://localhost:3000/api/dex/unlock', {
+            const API_URL = window.API_CONFIG?.API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${API_URL}/dex/unlock`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -368,7 +370,8 @@ class WeaponDex {
         // Obtener estadísticas globales del arma
         let stats = { total_openings: 0, current_existing: 0, total_conta_openings: 0, current_conta_existing: 0 };
         try {
-            const response = await fetch(`http://localhost:3000/api/weapon-stats/stats/${weapon.id}`);
+            const API_URL = window.API_CONFIG?.API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${API_URL}/weapon-stats/stats/${weapon.id}`);
             if (response.ok) {
                 stats = await response.json();
             }
@@ -626,8 +629,9 @@ class WeaponDex {
         try {
             const token = localStorage.getItem('authToken');
             if (!token) return;
+            const API_URL = window.API_CONFIG?.API_URL || 'http://localhost:3000/api';
             
-            const response = await fetch('http://localhost:3000/api/inventory/recalculate-all-passives', {
+            const response = await fetch(`${API_URL}/inventory/recalculate-all-passives`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

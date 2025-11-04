@@ -42,8 +42,8 @@ class ChatSystem {
     }
     
     initialize() {
-        // Conectar con Socket.IO
-        this.socket = io('http://localhost:3000');
+        // Conectar con Socket.IO usando la URL configurada
+        this.socket = io(window.API_CONFIG.BASE_URL);
         
         // Event listeners
         this.setupSocketListeners();

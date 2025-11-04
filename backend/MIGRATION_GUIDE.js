@@ -1,29 +1,58 @@
 // Script para migrar rutas de SQLite a PostgreSQL
-// Este script contiene las instrucciones de cambio para los archivos restantes
 
 /*
-ARCHIVOS PENDIENTES DE ACTUALIZAR:
-1. player-profile.js
-2. iconos.js
-3. borders.js
-4. dex.js
-5. game.js
-6. recalculate-stats.js
-7. boxes.js (MUY COMPLEJO)
-8. inventory.js (MUY COMPLEJO)
-9. market.js (MUY COMPLEJO)
+✅ COMPLETADOS:
+- auth.js
+- stats.js
+- weapon-stats.js
+- ranking.js
+- player-profile.js
+- iconos.js
+- borders.js
 
-CAMBIOS NECESARIOS:
-1. Cambiar: const { db } = require('../database/database');
-   Por: const { query } = require('../database/database-postgres');
+⚠️ PENDIENTES (Actualizar imports y queries):
+- dex.js (iniciado - solo import cambiado)
+- game.js
+- recalculate-stats.js
+- boxes.js (MUY COMPLEJO - ~305 líneas)
+- inventory.js (MUY COMPLEJO - ~668 líneas)
+- market.js (MUY COMPLEJO - grande)
 
-2. Convertir callbacks a async/await
-3. Cambiar placeholders ? por $1, $2, $3, etc.
-4. Cambiar db.get() por await query().then(result => result.rows[0])
-5. Cambiar db.all() por await query().then(result => result.rows)
-6. Cambiar db.run() por await query()
-7. Cambiar this.lastID por result.rows[0].id con RETURNING id
-8. Cambiar this.changes por result.rowCount
+PATRÓN DE CONVERSIÓN:
+
+1. Import:
+   const { db } = require('../database/database');
+   → const { query } = require('../database/database-postgres');
+
+2. db.get() → PostgreSQL:
+   db.get('SELECT * FROM users WHERE id = ?', [id], (err, row) => {...})
+   → 
+   const result = await query('SELECT * FROM users WHERE id = $1', [id]);
+   const row = result.rows[0];
+
+3. db.all() → PostgreSQL:
+   db.all('SELECT * FROM table', [], (err, rows) => {...})
+   →
+   const result = await query('SELECT * FROM table', []);
+   const rows = result.rows;
+
+4. db.run() → PostgreSQL:
+   db.run('UPDATE users SET name = ? WHERE id = ?', [name, id], function(err) {...})
+   →
+   await query('UPDATE users SET name = $1 WHERE id = $2', [name, id]);
+
+5. this.lastID → PostgreSQL:
+   db.run('INSERT INTO users (name) VALUES (?)', [name], function(err) {
+     const id = this.lastID;
+   })
+   →
+   const result = await query('INSERT INTO users (name) VALUES ($1) RETURNING id', [name]);
+   const id = result.rows[0].id;
+
+6. this.changes → result.rowCount
+
+NOTA: Los archivos dex.js, game.js, recalculate-stats.js, boxes.js, inventory.js y market.js
+necesitan actualización completa siguiendo estos patrones.
 */
 
-console.log('Ver este archivo para instrucciones de migración manual');
+console.log('Ver MIGRATION_GUIDE.js para instrucciones completas');

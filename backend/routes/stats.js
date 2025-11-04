@@ -1,18 +1,21 @@
 const express = require('express');
-const { db } = require('../database/database');
+const { query } = require('../database/database-postgres');
 const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
 // Obtener estadísticas del usuario
-router.get('/user', authenticateToken, (req, res) => {
-  const userId = req.user.userId;
+router.get('/user', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
 
-  db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
-    if (err || !user) {
+    const result = await query('SELECT * FROM users WHERE id = $1', [userId]);
+    
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
+    const user = result.rows[0];
     res.json({
       success: true,
       stats: {
@@ -33,25 +36,30 @@ router.get('/user', authenticateToken, (req, res) => {
         dinero_por_segundo_porcentaje: parseFloat(user.dinero_por_segundo_porcentaje || 0)
       }
     });
-
-  });
+  } catch (error) {
+    console.error('Error obteniendo estadísticas:', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
 });
 
 // Añadir experiencia al usuario
-router.post('/add-experience', authenticateToken, (req, res) => {
-  const userId = req.user.userId;
-  const { experience } = req.body;
+router.post('/add-experience', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { experience } = req.body;
 
-  if (!experience || experience <= 0) {
-    return res.status(400).json({ error: 'Experiencia inválida' });
-  }
+    if (!experience || experience <= 0) {
+      return res.status(400).json({ error: 'Experiencia inválida' });
+    }
 
-  // Obtener datos actuales del usuario
-  db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
-    if (err || !user) {
+    // Obtener datos actuales del usuario
+    const result = await query('SELECT * FROM users WHERE id = $1', [userId]);
+    
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
+    const user = result.rows[0];
     let newExp = user.experience + experience;
     let newLevel = user.level;
     let leveledUp = false;
@@ -64,39 +72,40 @@ router.post('/add-experience', authenticateToken, (req, res) => {
     }
 
     // Actualizar en la base de datos
-    db.run(
-      'UPDATE users SET level = ?, experience = ? WHERE id = ?',
-      [newLevel, newExp, userId],
-      function(err) {
-        if (err) {
-          return res.status(500).json({ error: 'Error actualizando estadísticas' });
-        }
-
-        res.json({
-          success: true,
-          message: leveledUp ? '¡Subiste de nivel!' : 'Experiencia añadida',
-          leveledUp: leveledUp,
-          newLevel: newLevel,
-          newExperience: newExp,
-          currentExp: newExp,
-          maxExp: calculateExpForNextLevel(newLevel),
-          experienceGained: experience,
-          experienceToNext: calculateExpForNextLevel(newLevel) - newExp
-        });
-      }
+    await query(
+      'UPDATE users SET level = $1, experience = $2 WHERE id = $3',
+      [newLevel, newExp, userId]
     );
-  });
+
+    res.json({
+      success: true,
+      message: leveledUp ? '¡Subiste de nivel!' : 'Experiencia añadida',
+      leveledUp: leveledUp,
+      newLevel: newLevel,
+      newExperience: newExp,
+      currentExp: newExp,
+      maxExp: calculateExpForNextLevel(newLevel),
+      experienceGained: experience,
+      experienceToNext: calculateExpForNextLevel(newLevel) - newExp
+    });
+  } catch (error) {
+    console.error('Error añadiendo experiencia:', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
 });
 
 // Ruta temporal para recalcular nivel basado en experiencia actual
-router.post('/recalculate-level', authenticateToken, (req, res) => {
-  const userId = req.user.userId;
-  
-  db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
-    if (err || !user) {
+router.post('/recalculate-level', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    const result = await query('SELECT * FROM users WHERE id = $1', [userId]);
+    
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
-    
+
+    const user = result.rows[0];
     let totalExp = user.experience;
     let correctLevel = 1;
     let remainingExp = totalExp;
@@ -109,20 +118,19 @@ router.post('/recalculate-level', authenticateToken, (req, res) => {
     }
     
     // Actualizar nivel y experiencia (resetear a la exp del nivel actual)
-    db.run('UPDATE users SET level = ?, experience = ? WHERE id = ?', [correctLevel, remainingExp, userId], (err) => {
-      if (err) {
-        return res.status(500).json({ error: 'Error actualizando nivel' });
-      }
-      
-      res.json({
-        success: true,
-        oldLevel: user.level,
-        newLevel: correctLevel,
-        experience: remainingExp,
-        message: `Nivel recalculado de ${user.level} a ${correctLevel} con ${remainingExp} XP`
-      });
+    await query('UPDATE users SET level = $1, experience = $2 WHERE id = $3', [correctLevel, remainingExp, userId]);
+    
+    res.json({
+      success: true,
+      oldLevel: user.level,
+      newLevel: correctLevel,
+      experience: remainingExp,
+      message: `Nivel recalculado de ${user.level} a ${correctLevel} con ${remainingExp} XP`
     });
-  });
+  } catch (error) {
+    console.error('Error recalculando nivel:', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
 });
 
 // Función para calcular experiencia TOTAL acumulada necesaria para alcanzar un nivel

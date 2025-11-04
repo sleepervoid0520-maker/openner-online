@@ -1,3 +1,6 @@
+// Cargar variables de entorno
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -20,8 +23,8 @@ const io = socketIO(server, {
   }
 });
 
-// Base de datos y rutas
-const { initializeDatabase } = require('./database/database');
+// Base de datos y rutas - usando PostgreSQL
+const { initializeDatabase } = require('./database/database-postgres');
 const authRoutes = require('./routes/auth');
 const statsRoutes = require('./routes/stats');
 const boxesRoutes = require('./routes/boxes');

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { db } = require('../database/database');
+const { query } = require('../database/database-postgres');
 const { authenticateToken } = require('../middleware/auth');
 
 // Obtener perfil de un jugador por username

@@ -35,10 +35,23 @@ router.post('/register', async (req, res) => {
       // Icono por defecto desbloqueado
       const defaultIcons = JSON.stringify(["/arma/glock 17 cereza.png"]);
       db.run(
-        'INSERT INTO users (username, email, password_hash, unlocked_icons) VALUES (?, ?, ?, ?)',
-        [username, email, hashedPassword, defaultIcons],
+        `INSERT INTO users (
+          username, email, password_hash, unlocked_icons,
+          level, experience, money,
+          mayor_costo_armas, suerte, menor_costo_cajas_percent,
+          mayor_exp_caja_percent, mayor_probabilidad_grado,
+          dinero_por_segundo, dinero_por_segundo_porcentaje
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          username, email, hashedPassword, defaultIcons,
+          1, 0, 1000, // level, experience, money inicial
+          0, 0, 0,    // mayor_costo_armas, suerte, menor_costo_cajas_percent
+          0, 0,       // mayor_exp_caja_percent, mayor_probabilidad_grado
+          0, 0        // dinero_por_segundo, dinero_por_segundo_porcentaje
+        ],
         function(err) {
           if (err) {
+            console.error('Error al crear usuario:', err);
             return res.status(500).json({ error: 'Error al crear usuario' });
           }
 
@@ -54,6 +67,7 @@ router.post('/register', async (req, res) => {
               email,
               level: 1,
               experience: 0,
+              money: 1000,
               created_at: new Date().toISOString()
             }
           });

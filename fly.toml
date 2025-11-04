@@ -1,0 +1,31 @@
+# fly.toml - Configuración de Fly.io para Openner Online
+
+app = "openner-online"
+primary_region = "mia"  # Miami - buena latencia para LATAM
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false  # No apagar por inactividad
+  auto_start_machines = true
+  min_machines_running = 1    # Siempre al menos 1 máquina activa
+
+[[http_service.checks]]
+  grace_period = "30s"
+  interval = "15s"
+  method = "GET"
+  timeout = "5s"
+  path = "/api/stats"
+
+# Volumen persistente para la base de datos SQLite
+[mounts]
+  source = "openner_data"
+  destination = "/app/backend/database"
+  initial_size = "1GB"

@@ -1,0 +1,38 @@
+# Dockerignore - Archivos a excluir del build
+
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Base de datos local (no incluir en imagen)
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos de desarrollo
+.env
+.env.local
+.env.development
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Documentación
+README.md
+*.md
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
